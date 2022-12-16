@@ -26,7 +26,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
 import argparse
 
-DEVICE = 'cuda:1'
+DEVICE = 'cuda'
 modality_types = ['flair', 't1', 't1ce', 't2']
 
 class BratsDataset(Dataset):
