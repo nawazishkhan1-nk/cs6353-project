@@ -103,7 +103,7 @@ if args.evaluate:
             y = p.get_y() + p.get_height()
             ax.annotate(percentage, (x, y), fontsize=15, fontweight="bold")
 
-    fig.savefig(f"eavaluation_bar_plot-{args.model_type}.png", format="png",  pad_inches=0.2, transparent=False, bbox_inches='tight')
+    fig.savefig(f"plots/evaluation_bar_plot-{args.model_type}.png", format="png",  pad_inches=0.2, transparent=False, bbox_inches='tight')
     print(f'******* Evaluation metrics saved ********')
     # TODO: 
     # Add Evaluation Script
