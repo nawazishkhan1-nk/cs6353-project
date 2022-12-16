@@ -473,7 +473,7 @@ class BaselineModelTrainer:
                     ]
         pd.DataFrame(
             dict(zip(log_names, logs))
-        ).to_csv("train_log.csv", index=False)
+        ).to_csv("logs/train_log.csv", index=False)
 
 class CasacdedModelTrainer:
     def __init__(self,
@@ -623,4 +623,4 @@ class CasacdedModelTrainer:
                     ]
         pd.DataFrame(
             dict(zip(log_names, logs))
-        ).to_csv("train_log-CascadedModel.csv", index=False)
+        ).to_csv("logs/train_log-CascadedModel.csv", index=False)
