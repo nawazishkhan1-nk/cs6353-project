@@ -105,6 +105,7 @@ if args.evaluate:
 
     fig.savefig(f"plots/evaluation_bar_plot-{args.model_type}.png", format="png",  pad_inches=0.2, transparent=False, bbox_inches='tight')
     print(f'******* Evaluation metrics saved ********')
-    # TODO: 
-    # Add Evaluation Script
-    # show_results by Sunjoo and graphs by Yo
+
+    # collect raw data
+    val_metics_df.to_csv(f'metrics_{args.model_type}.csv')
+
