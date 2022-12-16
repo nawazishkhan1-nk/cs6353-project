@@ -24,8 +24,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
+import argparse
 
-DEVICE = 'cuda:2'
+DEVICE = 'cuda:1'
 modality_types = ['flair', 't1', 't1ce', 't2']
 
 class BratsDataset(Dataset):
@@ -99,7 +100,7 @@ def shuffle_split(all_dirs, val_pct = 0.15, seed = 99):
 
 def compute_scores_per_classes(model,
                                dataloader,
-                               classes):
+                               classes, cascaded_model=False):
     """
     Compute Dice and Jaccard coefficients for each class.
     Params:
@@ -117,6 +118,9 @@ def compute_scores_per_classes(model,
 #             imgs, targets = data['image'], data['mask']
             imgs, targets = imgs.to(device), targets.to(device)
             logits = model(imgs.float())
+            if cascaded_model:
+                logits = (logits[0] + logits[1] + logits[2] + logits[3])/4
+                
             logits = logits.detach().cpu().numpy()
             targets = targets.detach().cpu().numpy()
             
@@ -322,9 +326,6 @@ def jaccard_coef_metric_per_classes(probabilities: np.ndarray,
 
     return scores
 
-
-
-
 class BaselineModelTrainer:
     def __init__(self,
                  net: nn.Module,
@@ -335,8 +336,8 @@ class BaselineModelTrainer:
                  accumulation_steps: int,
                  batch_size: int,
                  num_epochs: int,
-                 display_plot: bool = True,
-
+                 output_model_fn: bool,
+                 display_plot: bool = True
                 ):
 
         """Initialization."""
@@ -351,6 +352,7 @@ class BaselineModelTrainer:
                                            patience=2, verbose=True)
         self.accumulation_steps = accumulation_steps // batch_size
         self.phases = ["train", "val"]
+        self.output_model_fn = output_model_fn
         self.num_epochs = num_epochs
         self.dataloaders = {
             "train": train_dl,
@@ -415,7 +417,7 @@ class BaselineModelTrainer:
             if val_loss < self.best_loss:
                 print(f"\n{'#'*20}\nSaved new checkpoint\n{'#'*20}\n")
                 self.best_loss = val_loss
-                torch.save(self.net.state_dict(), "best_model_baseline.pth")
+                torch.save(self.net.state_dict(), self.output_model_fn)
             print()
         self._save_train_history()
             
@@ -483,8 +485,8 @@ class CasacdedModelTrainer:
                  accumulation_steps: int,
                  batch_size: int,
                  num_epochs: int,
-                 display_plot: bool = True,
-
+                 output_model_fn: str,
+                 display_plot: bool = True
                 ):
 
         """Initialization."""
@@ -499,6 +501,7 @@ class CasacdedModelTrainer:
                                            patience=2, verbose=True)
         self.accumulation_steps = accumulation_steps // batch_size
         self.phases = ["train", "val"]
+        self.output_model_fn = output_model_fn
         self.num_epochs = num_epochs
         self.dataloaders = {
             "train": train_dl,
@@ -564,7 +567,7 @@ class CasacdedModelTrainer:
             if val_loss < self.best_loss:
                 print(f"\n{'#'*20}\nSaved new checkpoint\n{'#'*20}\n")
                 self.best_loss = val_loss
-                torch.save(self.net.state_dict(), "best_model_cascaded_new.pth")
+                torch.save(self.net.state_dict(), self.output_model_fn)
             print()
         self._save_train_history()
             
@@ -620,4 +623,4 @@ class CasacdedModelTrainer:
                     ]
         pd.DataFrame(
             dict(zip(log_names, logs))
-        ).to_csv("train_log.csv", index=False)
+        ).to_csv("train_log-CascadedModel.csv", index=False)

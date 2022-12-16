@@ -2,7 +2,6 @@ from global_imports import *
 
 # Proposed Model -- Cascaded UNet++
 
-
 class VGGBlock(nn.Module):
     def __init__(self, in_channels, middle_channels, out_channels):
         super().__init__()
@@ -81,7 +80,6 @@ class UNetModifiedBlock(nn.Module):
 
         return output
 
-
 class CascadedModel(nn.Module):
     def __init__(self, n_channels=3, n_classes=4):
         super().__init__()
@@ -89,6 +87,8 @@ class CascadedModel(nn.Module):
         num_classes = n_classes
 
         nb_filter = [32, 64, 128, 256, 512]
+        # nb_filter = [64, 128, 256, 512, 1024]
+
 
         self.pool = nn.MaxPool2d(2, 2)
         self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
@@ -151,8 +151,3 @@ class CascadedModel(nn.Module):
         output4 = self.final4(x0_4)
         output = self.final(x0_4)
         return [output1, output2, output3, output4, output]
-
-
-
-
-
